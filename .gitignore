@@ -1,0 +1,28 @@
+# Virtual Environment
+.venv/
+
+# Python cache
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Database
+securevault.db
+
+# Encryption key
+secret.key
+
+# Logs
+logs/
+
+# Backups
+backups/
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+
+# macOS
+.DS_Store

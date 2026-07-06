@@ -1,112 +1,41 @@
-import customtkinter as ctk
+﻿import customtkinter as ctk
 
 from ui import theme
-from ui.widgets.sidebar import Sidebar
+from ui.widgets.page_layout import BasePage
 from ui.widgets.header import Header
 from ui.widgets.stat_card import StatCard
+from ui.pages.vault import VaultPage
+from database.models import Password
 
 
-class DashboardPage(ctk.CTkFrame):
+class DashboardPage(BasePage):
 
     def __init__(self, master):
-        super().__init__(master, fg_color=theme.BACKGROUND)
+        super().__init__(master, active_page="dashboard")
 
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+    def build_content(self, content):
 
-        # Sidebar
-        sidebar = Sidebar(self)
-        sidebar.grid(row=0, column=0, sticky="ns")
-
-        # Conteúdo
-        content = ctk.CTkFrame(
-            self,
-            fg_color="transparent"
-        )
-
-        content.grid(
-            row=0,
-            column=1,
-            sticky="nsew",
-            padx=30,
-            pady=25
-        )
-
+        content.grid_rowconfigure(2, weight=1)
         content.grid_columnconfigure((0, 1, 2), weight=1)
 
-        # ================= HEADER =================
+        header = Header(content, username=self.app.current_username or "User")
+        header.grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 25))
 
-        header = Header(content)
-        header.grid(
-            row=0,
-            column=0,
-            columnspan=3,
-            sticky="ew",
-            pady=(0, 25)
-        )
+        user_id = self.app.current_user_id
 
-        # ================= CARDS =================
+        passwords_list = Password.get_all(user_id)
 
-        passwords = StatCard(content, "Passwords", 0)
-        passwords.grid(row=1, column=0, padx=10, sticky="ew")
+        total_passwords = len(passwords_list)
+        total_categories = len({p[6] for p in passwords_list}) if passwords_list else 0
 
-        categories = StatCard(content, "Categories", 0)
-        categories.grid(row=1, column=1, padx=10, sticky="ew")
+        passwords_card = StatCard(content, "Passwords", total_passwords)
+        passwords_card.grid(row=1, column=0, padx=10, sticky="ew")
 
-        weak = StatCard(content, "Weak Passwords", 0, theme.ERROR)
-        weak.grid(row=1, column=2, padx=10, sticky="ew")
+        categories_card = StatCard(content, "Categories", total_categories)
+        categories_card.grid(row=1, column=1, padx=10, sticky="ew")
 
-        # ================= PASSWORDS =================
+        weak_card = StatCard(content, "Weak Passwords", 0, theme.ERROR)
+        weak_card.grid(row=1, column=2, padx=10, sticky="ew")
 
-        recent = ctk.CTkFrame(
-            content,
-            fg_color=theme.SURFACE,
-            corner_radius=15
-        )
-
-        recent.grid(
-            row=2,
-            column=0,
-            columnspan=3,
-            sticky="nsew",
-            padx=10,
-            pady=30
-        )
-
-        ctk.CTkLabel(
-            recent,
-            text="Recent Passwords",
-            font=("Segoe UI", 20, "bold"),
-            text_color=theme.TEXT
-        ).pack(anchor="w", padx=20, pady=(20, 15))
-
-        for site in [
-            "Github",
-            "Google",
-            "Discord",
-            "Steam",
-            "Microsoft"
-        ]:
-
-            row = ctk.CTkFrame(
-                recent,
-                fg_color=theme.BACKGROUND,
-                corner_radius=8,
-                height=45
-            )
-
-            row.pack(fill="x", padx=20, pady=5)
-
-            ctk.CTkLabel(
-                row,
-                text="🔑  " + site,
-                font=("Segoe UI", 15),
-                text_color=theme.TEXT
-            ).pack(side="left", padx=15, pady=10)
-
-            ctk.CTkButton(
-                row,
-                text="View",
-                width=70,
-                height=30
-            ).pack(side="right", padx=10)
+        vault = VaultPage(content, user_id=user_id)
+        vault.grid(row=2, column=0, columnspan=3, sticky="nsew", padx=10, pady=(30, 0))

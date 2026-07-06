@@ -1,12 +1,13 @@
-import customtkinter as ctk
+﻿import customtkinter as ctk
 from datetime import datetime
 
 from ui import theme
+from ui.widgets.icon_factory import make_icon
 
 
 class Header(ctk.CTkFrame):
 
-    def __init__(self, master, username="Luis"):
+    def __init__(self, master, username="User"):
         super().__init__(
             master,
             fg_color="transparent",
@@ -39,13 +40,13 @@ class Header(ctk.CTkFrame):
             right,
             width=250,
             height=40,
-            placeholder_text="Search..."
+            placeholder_text="Search...",
         )
         self.search.pack(side="left", padx=10)
 
         avatar = ctk.CTkLabel(
             right,
-            text="👤",
-            font=("Segoe UI Emoji", 28)
+            image=make_icon("gear", size=28, color=theme.TEXT_SECONDARY),
+            text=""
         )
         avatar.pack(side="left")

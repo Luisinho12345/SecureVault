@@ -1,14 +1,20 @@
-PRIMARY = "#2563EB"
-PRIMARY_HOVER = "#1D4ED8"
+﻿APP_NAME = "SecureVault"
+APP_VERSION = "1.0.0"
 
-BACKGROUND = "#0F172A"
-SURFACE = "#1E293B"
+DATABASE_NAME = "securevault.db"
 
-TEXT = "#FFFFFF"
-TEXT_SECONDARY = "#94A3B8"
+MIN_USERNAME_LENGTH = 3
+MIN_MASTER_PASSWORD_LENGTH = 6
 
-SUCCESS = "#22C55E"
-ERROR = "#EF4444"
+DEFAULT_CATEGORIES = [
+    "Email",
+    "Social Media",
+    "Banking",
+    "Work",
+    "Games",
+    "Shopping",
+    "Other"
+]
 
-WINDOW_WIDTH = 1200
-WINDOW_HEIGHT = 700
+BACKUP_DIR = "backups"
+LOG_DIR = "logs"
