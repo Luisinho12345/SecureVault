@@ -11,5 +11,8 @@ class VaultFullPage(BasePage):
         content.grid_rowconfigure(0, weight=1)
         content.grid_columnconfigure(0, weight=1)
 
-        vault = VaultPage(content, user_id=self.app.current_user_id)
-        vault.grid(row=0, column=0, sticky="nsew")
+        self.vault = VaultPage(content, user_id=self.app.current_user_id)
+        self.vault.grid(row=0, column=0, sticky="nsew")
+
+    def refresh(self):
+        self.vault.load_passwords()

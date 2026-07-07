@@ -4,6 +4,7 @@ from ui import theme
 from ui.widgets.page_layout import BasePage
 from ui.windows.add_password import AddPasswordWindow
 from security.password_generator import generate_password, check_strength
+from ui.widgets.toast import show_toast
 
 
 class GeneratorPage(BasePage):
@@ -180,13 +181,14 @@ class GeneratorPage(BasePage):
         self.clipboard_clear()
         self.clipboard_append(password)
 
-        self.status_label.configure(text="Password copied!")
-        self.after(2000, lambda: self.status_label.configure(text=""))
+        show_toast(self.winfo_toplevel(), "Password copied to clipboard!", kind="success")
 
     def use_password(self):
 
         password = self.result_var.get()
 
-        window = AddPasswordWindow(self.app.current_page, self.app.current_user_id)
+        window = AddPasswordWindow(self.app.get_current_page(), self.app.current_user_id)
         window.password.insert(0, password)
+
+
 

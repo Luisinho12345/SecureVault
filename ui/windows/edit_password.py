@@ -3,7 +3,9 @@
 from ui import theme
 from database.models import Password
 from utils.validators import validate_password_entry
+from utils.constants import DEFAULT_CATEGORIES
 from utils.logger import get_logger
+from ui.widgets.toast import show_toast
 
 logger = get_logger()
 
@@ -17,7 +19,7 @@ class EditPasswordWindow(ctk.CTkToplevel):
         self.password_id = password[0]
 
         self.title("Edit Password")
-        self.geometry("450x520")
+        self.geometry("450x540")
         self.resizable(False, False)
 
         self.grab_set()
@@ -36,8 +38,21 @@ class EditPasswordWindow(ctk.CTkToplevel):
         self.password_entry.insert(0, password[4])
         self.password_entry.pack(pady=8)
 
-        self.category = ctk.CTkEntry(self, width=350, height=40, placeholder_text="Category")
-        self.category.insert(0, password[6])
+        current_category = password[6]
+
+        # Se a categoria guardada nao estiver na lista padrao, adiciona-a
+        # temporariamente as opcoes para nao a perder ao editar.
+        values = list(DEFAULT_CATEGORIES)
+        if current_category not in values:
+            values.append(current_category)
+
+        self.category = ctk.CTkComboBox(
+            self,
+            width=350,
+            height=40,
+            values=values
+        )
+        self.category.set(current_category)
         self.category.pack(pady=8)
 
         self.message = ctk.CTkLabel(self, text="", font=theme.SMALL_FONT)
@@ -67,3 +82,5 @@ class EditPasswordWindow(ctk.CTkToplevel):
 
         self.destroy()
         self.master.load_passwords()
+
+        show_toast(self.master.winfo_toplevel(), "Password updated!", kind="success")

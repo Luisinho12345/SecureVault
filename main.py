@@ -1,7 +1,14 @@
+﻿from database.database import create_database
+from ui.splash import SplashScreen
 from app import SecureVaultApp
-from database.database import create_database
 
 create_database()
 
-app = SecureVaultApp()
-app.mainloop()
+
+def launch_main_app():
+    app = SecureVaultApp()
+    app.mainloop()
+
+
+splash = SplashScreen(on_finish=launch_main_app)
+splash.mainloop()

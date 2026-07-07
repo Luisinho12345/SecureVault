@@ -5,6 +5,7 @@ from database.models import User
 from security.hashing import verify_password
 from ui.widgets.icon_factory import make_icon
 from utils.logger import get_logger
+from ui.widgets.toast import show_toast
 
 logger = get_logger()
 
@@ -106,4 +107,5 @@ class LoginPage(ctk.CTkFrame):
 
     def register(self):
         self.master.show_register()
+
 

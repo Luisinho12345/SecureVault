@@ -1,28 +1,25 @@
-# Virtual Environment
+﻿# Ambiente virtual
 .venv/
+venv/
+env/
 
-# Python cache
-**/__pycache__/
+# Cache Python
+__pycache__/
 *.pyc
-*.pyo
 
-# Database
-securevault.db
-
-# Encryption key
+# Dados sensiveis - NUNCA publicar
 secret.key
+securevault.db
+*.db
 
-# Logs
+# Logs e backups locais
 logs/
-
-# Backups
 backups/
 
-# VS Code
-.vscode/
-
-# Windows
+# Ficheiros do sistema
+.DS_Store
 Thumbs.db
 
-# macOS
-.DS_Store
+# IDE
+.vscode/
+.idea/

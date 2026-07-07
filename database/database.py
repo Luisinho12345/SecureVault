@@ -1,4 +1,4 @@
-import sqlite3
+﻿import sqlite3
 
 DATABASE_NAME = "securevault.db"
 
@@ -33,4 +33,12 @@ def create_database():
     """)
 
     conn.commit()
+
+    # Migracao: adiciona a coluna pin_hash se ainda nao existir
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN pin_hash TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # a coluna ja existe
+
     conn.close()

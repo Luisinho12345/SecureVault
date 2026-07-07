@@ -3,7 +3,9 @@
 from ui import theme
 from database.models import Password
 from utils.validators import validate_password_entry
+from utils.constants import DEFAULT_CATEGORIES
 from utils.logger import get_logger
+from ui.widgets.toast import show_toast
 
 logger = get_logger()
 
@@ -17,7 +19,7 @@ class AddPasswordWindow(ctk.CTkToplevel):
         self.user_id = user_id
 
         self.title("Add Password")
-        self.geometry("450x520")
+        self.geometry("450x540")
         self.resizable(False, False)
 
         self.grab_set()
@@ -33,7 +35,13 @@ class AddPasswordWindow(ctk.CTkToplevel):
         self.password = ctk.CTkEntry(self, width=350, height=40, placeholder_text="Password")
         self.password.pack(pady=8)
 
-        self.category = ctk.CTkEntry(self, width=350, height=40, placeholder_text="Category")
+        self.category = ctk.CTkComboBox(
+            self,
+            width=350,
+            height=40,
+            values=DEFAULT_CATEGORIES
+        )
+        self.category.set(DEFAULT_CATEGORIES[0])
         self.category.pack(pady=8)
 
         self.message = ctk.CTkLabel(self, text="", font=theme.SMALL_FONT)
@@ -65,3 +73,5 @@ class AddPasswordWindow(ctk.CTkToplevel):
 
         if hasattr(self.master, "load_passwords"):
             self.master.load_passwords()
+
+        show_toast(self.master.winfo_toplevel(), "Password saved!", kind="success")

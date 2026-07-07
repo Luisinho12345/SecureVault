@@ -3,9 +3,11 @@ from tkinter import messagebox
 
 from ui import theme
 from ui.widgets.icon_factory import make_icon
+from ui.widgets.toast import show_toast
 from ui.windows.add_password import AddPasswordWindow
 from ui.windows.edit_password import EditPasswordWindow
-from database.models import Password
+from ui.windows.pin_dialog import CreatePinDialog, VerifyPinDialog
+from database.models import Password, User
 from utils.logger import get_logger
 
 logger = get_logger()
@@ -18,6 +20,7 @@ class VaultPage(ctk.CTkFrame):
 
         self.user_id = user_id
         self.rows = {}
+        self.pin_unlocked = False
 
         self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -45,14 +48,9 @@ class VaultPage(ctk.CTkFrame):
         search_frame.grid(row=1, column=0, sticky="ew", padx=25, pady=(0, 15))
         search_frame.grid_columnconfigure(0, weight=1)
 
-        self.search = ctk.CTkEntry(
-            search_frame, height=40, placeholder_text="Search...",
-        )
+        self.search = ctk.CTkEntry(search_frame, height=40, placeholder_text="Search...")
         self.search.grid(row=0, column=0, sticky="ew")
         self.search.bind("<KeyRelease>", lambda e: self.load_passwords())
-
-        self.status_label = ctk.CTkLabel(self, text="", font=theme.SMALL_FONT, text_color=theme.SUCCESS)
-        self.status_label.grid(row=1, column=0, sticky="e", padx=25)
 
         self.table = ctk.CTkScrollableFrame(self, fg_color=theme.SURFACE)
         self.table.grid(row=2, column=0, sticky="nsew", padx=25, pady=(0, 25))
@@ -125,13 +123,13 @@ class VaultPage(ctk.CTkFrame):
             ctk.CTkButton(
                 actions, image=make_icon("eye", size=16, color=theme.TEXT), text="",
                 width=32, height=28, fg_color="transparent", hover_color=theme.BORDER,
-                command=lambda pid=password_id: self.toggle_visibility(pid)
+                command=lambda pid=password_id: self.request_toggle_visibility(pid)
             ).pack(side="left", padx=2)
 
             ctk.CTkButton(
                 actions, image=make_icon("copy", size=16, color=theme.TEXT), text="",
                 width=32, height=28, fg_color="transparent", hover_color=theme.BORDER,
-                command=lambda pw=real_password: self.copy_password(pw)
+                command=lambda pw=real_password: self.request_copy_password(pw)
             ).pack(side="left", padx=2)
 
             ctk.CTkButton(
@@ -145,6 +143,46 @@ class VaultPage(ctk.CTkFrame):
                 width=32, height=28, fg_color="transparent", hover_color=theme.ERROR,
                 command=lambda pid=password_id: self.delete_password(pid)
             ).pack(side="left", padx=2)
+
+    # ==========================
+    # Protecao por PIN
+    # ==========================
+
+    def ensure_unlocked(self, action):
+        """
+        Garante que o utilizador desbloqueou com PIN antes de executar 'action'.
+        Se ainda nao tiver PIN definido, obriga a criar um primeiro.
+        """
+
+        if self.pin_unlocked:
+            action()
+            return
+
+        if not User.has_pin(self.user_id):
+
+            def after_create():
+                self.pin_unlocked = True
+                show_toast(self.winfo_toplevel(), "PIN created successfully!", kind="success")
+                action()
+
+            CreatePinDialog(self, self.user_id, on_success=after_create)
+            return
+
+        def after_verify():
+            self.pin_unlocked = True
+            action()
+
+        VerifyPinDialog(self, self.user_id, on_success=after_verify)
+
+    def request_toggle_visibility(self, password_id):
+        self.ensure_unlocked(lambda: self.toggle_visibility(password_id))
+
+    def request_copy_password(self, real_password):
+        self.ensure_unlocked(lambda: self.copy_password(real_password))
+
+    # ==========================
+    # Acoes
+    # ==========================
 
     def toggle_visibility(self, password_id):
 
@@ -160,8 +198,7 @@ class VaultPage(ctk.CTkFrame):
         self.clipboard_clear()
         self.clipboard_append(real_password)
 
-        self.status_label.configure(text="Password copied!")
-        self.after(2000, lambda: self.status_label.configure(text=""))
+        show_toast(self.winfo_toplevel(), "Password copied to clipboard!", kind="success")
 
     def delete_password(self, password_id):
 
@@ -172,6 +209,9 @@ class VaultPage(ctk.CTkFrame):
 
         Password.delete(password_id)
         logger.info(f"Password deleted: id={password_id}")
+
+        show_toast(self.winfo_toplevel(), "Password deleted.", kind="warning")
+
         self.load_passwords()
 
     def edit_password(self, password):
